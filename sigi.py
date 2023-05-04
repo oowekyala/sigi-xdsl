@@ -58,6 +58,20 @@ class PopOp(IRDLOperation):
             operands=[SSAValue.get(stack)]
         )
 
+@dataclass
+class FoldPushPop(RewritePattern):
+
+    @op_type_rewrite_pattern
+    def match_and_rewrite(self, op: PopOp, rewriter: PatternRewriter):
+        push_op = op.stack_operand.op
+        if isinstance(push_op, PushOp):
+            op.value_result.replace_by(push_op.value_operand)
+            op.stack_result.replace_by(push_op.stack_operand)
+            rewriter.erase_matched_op()
+            rewriter.erase_op(push_op)
+
+
+
 Sigi = Dialect([
     PushOp,
     PopOp,

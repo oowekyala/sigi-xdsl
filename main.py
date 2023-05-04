@@ -3,6 +3,7 @@ from xdsl.dialects.arith import *
 from xdsl.dialects.func import *
 from xdsl.dialects.builtin import *
 from xdsl.printer import Printer
+from xdsl.pattern_rewriter import *
 
 
 import sigi 
@@ -53,6 +54,16 @@ my_func = FuncOp.from_callable(
         s5 := sigi.PushOp.get(pop4.stack_result, v5),
         Return.get(s5)
     ])
+
+
+printer.print_op(my_func)
+
+
+walker = PatternRewriteWalker(GreedyRewritePatternApplier([sigi.FoldPushPop()]),
+                              walk_regions_first=True,
+                              apply_recursively=True,
+                              walk_reverse=False)
+walker.rewrite_module(my_func)
 
 
 printer.print_op(my_func)
